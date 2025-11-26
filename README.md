@@ -14,7 +14,7 @@ links to all your media. Manually downloading these files presents three signifi
 1. **Annoying Popups & Manual Effort:** Browsers often trigger repetitive "Allow multiple file downloads" popups,
    requiring constant manual confirmation for every single photo or video. This script automates sequential downloading,
    and retries the download three times before skipping a memory.
-2. **Handling ZIP Bundles:** Snapchat often bundles multiple memories (images/videos) into a single .zip file for
+2. **Handling ZIP Bundles:** Snapchat often bundles multiple memories (images/videos) into a single `.zip` file for
    download. This script automatically identifies and extracts these ZIP files, renames the contents to preserve the
    original timestamp, and adds the extracted files to the processing queue.
 3. **Missing Metadata:** The files downloaded manually or directly from the HTML will have their filesystem creation
@@ -45,7 +45,7 @@ You must have the following installed on your system:
 
 ### Python Dependencies
 
-All dependencies are defined in the pyproject.toml file. Use uv to create a virtual environment and install them:
+All dependencies are defined in the `pyproject.toml` file. Use uv to create a virtual environment and install them:
 
 ```shell
 # Create a virtual environment
