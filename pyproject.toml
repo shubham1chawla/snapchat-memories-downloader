@@ -1,0 +1,14 @@
+[project]
+name = "snapchat-memories-downloader"
+version = "1.0.0"
+description = "This command-line interface (CLI) application provides a robust and reliable way to download media from your Snapchat memories export file and ensure that the downloaded files retain correct metadata, including the original capture time and location coordinates."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "beautifulsoup4>=4.14.2",
+    "lxml>=6.0.2",
+    "pandas>=2.3.3",
+    "pillow>=12.0.0",
+    "pyexiftool>=0.5.6",
+    "requests>=2.32.5",
+]
