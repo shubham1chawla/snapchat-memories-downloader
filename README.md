@@ -6,6 +6,10 @@ This command-line interface (CLI) application provides a robust and reliable way
 memories export file and ensure that the downloaded files retain correct metadata, including the original capture time
 and location coordinates.
 
+> [!NOTE]
+> Read about the project
+> on [Medium](https://medium.com/@shuchawl/fixing-snapchats-memories-export-yes-including-capture-time-and-location-4663ac9a24e5)
+
 ### The Problem This Solves
 
 When you request your memories history from Snapchat, they provide an HTML file (`memories_history.html`) containing

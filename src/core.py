@@ -27,15 +27,14 @@ def _construct_dataframe(memories_html_path: str) -> pd.DataFrame:
     # Use pandas.read_html to quickly extract the table content
     with open(memories_html_path, "r") as file:
         html_content = file.read()
-        # Read the first table found in the HTML content
-        df = pd.read_html(StringIO(html_content))[0]
+        df = pd.read_html(StringIO(html_content))[0]  # First table in HTML
 
-    # Renaming columns to match the new convention
+    # Renaming columns
     df = df.rename(columns={
-        df.columns[0]: "timestamp_str",
-        df.columns[1]: "media_type",
-        df.columns[2]: "coordinates",
-        df.columns[3]: "download_link",
+        df.columns[0]: "timestamp_str",  # UTC-based time when media was captured
+        df.columns[1]: "media_type",  # Image or Video
+        df.columns[2]: "coordinates",  # Latitude, Longitude -40.0, 70.0
+        df.columns[3]: "download_link",  # A button containing <a> with download link
     })
 
     # Converting timestamp string to long
@@ -46,6 +45,12 @@ def _construct_dataframe(memories_html_path: str) -> pd.DataFrame:
 
     # Adding a new column for filename (without extension)
     df["file_name"] = df.apply(lambda r: f"{r["timestamp"]}_{r["media_type"]}", axis=1)
+
+    # Adding file path column
+    df["file_path"] = None
+
+    # Adding is zip column
+    df["is_zip"] = False
 
     # Adding a new column indicating whether file was extracted
     df["is_extracted"] = False
@@ -139,12 +144,6 @@ def _download_memories(df: pd.DataFrame, download_dir: str):
     # Getting already downloaded files
     already_downloaded_files = get_already_downloaded_files(download_dir)
     logger.info(f"Already downloaded files count: {len(already_downloaded_files)}")
-
-    # Creating file path column to dataframe
-    df["file_path"] = None
-
-    # Creating is zip column to dataframe
-    df["is_zip"] = False
 
     for i, row in df.iterrows():
         download_link = row["download_link"]
@@ -256,7 +255,7 @@ def _handle_zips(df: pd.DataFrame, download_dir: str):
                     new_row["file_name"] = os.path.splitext(final_extracted_base_file_path)[0]  # without extension
                     new_row["file_path"] = final_extracted_file_path
                     new_row["is_zip"] = False
-                    new_row["is_extracted"] = True
+                    new_row["is_extracted"] = True  # Keeping track of extracted memories
                     new_rows.append(new_row)
 
                     extracted_files_count += 1
@@ -270,9 +269,8 @@ def _handle_zips(df: pd.DataFrame, download_dir: str):
             logger.error(f"Error: The downloaded file '{zip_file_path}' is not a valid ZIP file.")
         except Exception as e:
             logger.error(f"Error processing ZIP file '{zip_file_path}': {e}")
-
-        # Clean up the temporary folder
         finally:
+            # Clean up the temporary folder
             if os.path.exists(temp_extract_dir):
                 shutil.rmtree(temp_extract_dir)
                 logger.debug(f"Deleted temporary folder: {temp_extract_dir}")
@@ -341,7 +339,7 @@ def _update_media_metadata_pyexiftool(file_path: str, timestamp_str: str, lat: f
     base_file_path = os.path.basename(file_path)
     try:
         with ExifToolHelper() as et:
-            # The execute_json method is used for writing. It handles escaping and execution.
+            # The execute method is used for writing. It handles escaping and execution.
             # -overwrite_original tells ExifTool to directly modify the file.
             et.execute(
                 "-overwrite_original",
@@ -420,7 +418,7 @@ def download_memories(memories_file_path: str, download_dir: str):
     logger.info("** DOWNLOADING MEMORIES **")
     logger.info("-" * 50)
 
-    # Start the sequential download process
+    # Start the download process
     _download_memories(df, download_dir)
 
     # Logging stats
