@@ -109,7 +109,7 @@ def _construct_dataframe(memories_html_path: str) -> pd.DataFrame:
 def _fetch_response(download_link: str, is_get_request: bool) -> requests.Response:
     """Fetches response from the URL"""
     
-    # Wir tun so, als wären wir ein normaler Browser (keine Snap-Tags!)
+    # emulate normal browser
     fake_headers = {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         "Referer": "https://accounts.snapchat.com/",
@@ -118,11 +118,11 @@ def _fetch_response(download_link: str, is_get_request: bool) -> requests.Respon
         "Connection": "keep-alive"
     }
 
-    # Eine Session verwenden (hält Cookies wie ein Browser)
+    # use session (with cookies)
     session = requests.Session()
 
     if is_get_request:
-        # NUR die Fake Headers, kein X-Snap-Route-Tag!
+        # only fake headers
         response = session.get(download_link, headers=fake_headers, stream=True, timeout=30)
     else:
         # POST Request
@@ -136,7 +136,7 @@ def _fetch_response(download_link: str, is_get_request: bool) -> requests.Respon
         headers.update(fake_headers)
         response = session.post(base_url, data=payload, headers=headers, stream=True, timeout=30)
 
-    # Handle response
+    # handle response
     response.raise_for_status()
     return response
 
