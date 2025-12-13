@@ -108,24 +108,36 @@ def _construct_dataframe(memories_html_path: str) -> pd.DataFrame:
 @retry(max_retries=MAX_RETRIES, delay=DOWNLOAD_DELAYS_SEC)
 def _fetch_response(download_link: str, is_get_request: bool) -> requests.Response:
     """Fetches response from the URL"""
-    # Determine Request Method
-    if is_get_request:
-        # Corresponds to JS GET request with custom headers
-        headers = {"X-Snap-Route-Tag": "mem-dmd", "User-Agent": "Mozilla/5.0"}
-        response = requests.get(download_link, headers=headers, stream=True)
-    else:
-        # Corresponds to JS POST request
-        # Split URL into base and parameters
-        url_parts = download_link.split("?", 1)
-        base_url = url_parts[0]
-        payload = url_parts[1] if len(url_parts) > 1 else ""
+    
+    # Wir tun so, als wären wir ein normaler Browser (keine Snap-Tags!)
+    fake_headers = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Referer": "https://accounts.snapchat.com/",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Connection": "keep-alive"
+    }
 
-        # The JS code uses application/x-www-form-urlencoded and sends parameters as body
-        headers = {"Content-type": "application/x-www-form-urlencoded", "User-Agent": "Mozilla/5.0"}
-        response = requests.post(base_url, data=payload, headers=headers, stream=True)
+    # Eine Session verwenden (hält Cookies wie ein Browser)
+    session = requests.Session()
+
+    if is_get_request:
+        # NUR die Fake Headers, kein X-Snap-Route-Tag!
+        response = session.get(download_link, headers=fake_headers, stream=True, timeout=30)
+    else:
+        # POST Request
+        if "?" in download_link:
+            base_url, payload = download_link.split("?", 1)
+        else:
+            base_url = download_link
+            payload = ""
+
+        headers = {"Content-type": "application/x-www-form-urlencoded"}
+        headers.update(fake_headers)
+        response = session.post(base_url, data=payload, headers=headers, stream=True, timeout=30)
 
     # Handle response
-    response.raise_for_status()  # Raise an exception for bad status codes (4xx or 5xx)
+    response.raise_for_status()
     return response
 
 
